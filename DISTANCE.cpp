@@ -5,21 +5,6 @@
 #include <string>
 #include <string.h>
 
-static int parseint()
-{
-    int c, n;
-
-    bool minus = getchar() == '-';
-
-    n = getchar() - '0';
-    while ((c = getchar()) >= '0')
-        n = 10*n + c-'0';
-
-    if(minus) n = -n;
-
-    return n;
-}
-
 static const int MAX_DIMENSIONS = 6;
 
 inline int calcDistance(int * p1, int * p2, int d)
@@ -55,33 +40,41 @@ int main()
 		std::cin.read(buf, BUFFER_SIZE);
 		input.append(buf, std::cin.gcount());
 	}
+//	std::cout << "Read done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 
 	char * inputStr = (char*)input.data();
 	
+	int out = 0;
 	for(int i = 0; i < size; i += d) 
 	{
 		for(int k = 0; k < d; ++k)
 		{
-			points[i+k] = strtol(inputStr, &inputStr, 10);
+			points[out+k] = strtol(inputStr, &inputStr, 10);
 		}
+		bool notgood = true;
 		for(int e = 0; e < (1<<d); ++e)
 		{
 			int extremum = 0;
 			for(int k = 0; k < d; ++k)
 			{
-				extremum += points[i+k] * ((e >> k) % 2 ? 1 : -1);
+				extremum += points[out+k] * ((e >> k) % 2 ? 1 : -1);
 			}
-			if(i == 0 || extremum > extremums[e])
+			if(i == 0 || extremum >= extremums[e])
 			{
 				extremums[e] = extremum;
+				notgood = false;
 			}
 		}
+		if(!notgood)
+		{
+			out += d;
+		}
 	}
+	size = out;
 
-//	std::cout << "Read done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+//	std::cout << "Read points done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 
-	int * goodPoints = new int[d<<MAX_DIMENSIONS];
-	int goodPointCount = 0;
+	int goodSize = 0;
 	for(int i = 0; i < size; i += d)
 	{
 		for(int e = 0; e < (1<<d); ++e)
@@ -93,18 +86,19 @@ int main()
 			}
 			if(extremum == extremums[e])
 			{
-				memcpy(goodPoints + goodPointCount * d, points + i, d * sizeof(int));
-				++goodPointCount;
+				memcpy(points + goodSize, points + i, d * sizeof(int));
+				goodSize += d;
 				break;
 			}
 		}
 	}
+	size = goodSize;
 
-//	std::cout << "good points " << goodPointCount << " / " << N << std::endl;
+//	std::cout << "Good points done(" << size/d << "), elapsed " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 
 	int maxDistance = 0;
-	int * end = goodPoints + goodPointCount*d;
-	for(int * p1 = goodPoints; p1 != end; p1 += d)
+	int * end = points + size;
+	for(int * p1 = points; p1 != end; p1 += d)
 	{
 		for(int * p2 = p1; p2 != end; p2 += d)
 		{
@@ -116,7 +110,6 @@ int main()
 		}
 	}
 	delete[] points;
-	delete[] goodPoints;
 	std::cout << maxDistance << std::endl;
 
 //	std::cout << "Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
