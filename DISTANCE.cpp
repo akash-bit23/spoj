@@ -5,25 +5,22 @@
 #include <string>
 #include <string.h>
 
-static const int MAX_DIMENSIONS = 6;
-static const int MAX_POINTS = 1000000;
-int extremumCount = 0;
-
-struct Point
+static int parseint()
 {
-	int val[MAX_DIMENSIONS];
-	int extremum[1 << MAX_DIMENSIONS];
-};
+    int c, n;
 
+    bool minus = getchar() == '-';
 
-std::string inputStr;
-int N = 0;
-int d = 0;
-int size = 0;
-Point points[MAX_POINTS];
-int extremums[1 << MAX_DIMENSIONS];	
-bool signs[MAX_DIMENSIONS << MAX_DIMENSIONS];
+    n = getchar() - '0';
+    while ((c = getchar()) >= '0')
+        n = 10*n + c-'0';
 
+    if(minus) n = -n;
+
+    return n;
+}
+
+static const int MAX_DIMENSIONS = 6;
 
 inline int calcDistance(int * p1, int * p2, int d)
 {
@@ -38,101 +35,89 @@ inline int calcDistance(int * p1, int * p2, int d)
 	return distance;
 }
 
-void readInput()
+int main()
 {
-	std::cin >> N >> d;
-	size = N*d;
-	extremumCount = 1<<d;
+	auto start = std::chrono::system_clock::now();
 
+	int N;
+	int d;
+	std::cin >> N >> d;
+	int size = N*d;
+	int * points = new int[size];
+
+	int extremums[1 << MAX_DIMENSIONS];	
+
+	std::string input;
 	static const int BUFFER_SIZE = 1024*1024;
 	char buf[BUFFER_SIZE];
 	while(std::cin.good()) 
 	{
 		std::cin.read(buf, BUFFER_SIZE);
-		inputStr.append(buf, std::cin.gcount());
+		input.append(buf, std::cin.gcount());
 	}
-}
 
-void readPoints()
-{
-	char * input = (char*)inputStr.data();
+	char * inputStr = (char*)input.data();
 	
-	for(int i = 0; i < N; ++i) 
+	for(int i = 0; i < size; i += d) 
 	{
-		Point & point = points[i];
 		for(int k = 0; k < d; ++k)
 		{
-			point.val[k] = strtol(input, &input, 10);
-
-			for(int e = 0; e < extremumCount; ++e)
-			{
-				point.extremum[e] += point.val[k] * ((e >> k) % 2 ? 1 : -1);
-			}
+			points[i+k] = strtol(inputStr, &inputStr, 10);
 		}
-
-		for(int e = 0; e < extremumCount; ++e)
+		for(int e = 0; e < (1<<d); ++e)
 		{
-			if(i == 0 || point.extremum[e] > extremums[e])
+			int extremum = 0;
+			for(int k = 0; k < d; ++k)
 			{
-				extremums[e] = point.extremum[e];
+				extremum += points[i+k] * ((e >> k) % 2 ? 1 : -1);
+			}
+			if(i == 0 || extremum > extremums[e])
+			{
+				extremums[e] = extremum;
 			}
 		}
 	}
-}
 
-void calcGoodPoints()
-{
-	int offset = 0;
-	for(int i = 0; i < N; ++i)
+//	std::cout << "Read done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+
+	int * goodPoints = new int[d<<MAX_DIMENSIONS];
+	int goodPointCount = 0;
+	for(int i = 0; i < size; i += d)
 	{
-		for(int e = 0; e < extremumCount; ++e)
+		for(int e = 0; e < (1<<d); ++e)
 		{
-			if(points[i].extremum[e] == extremums[e])
+			int extremum = 0;
+			for(int k = 0; k < d; ++k)
 			{
-				points[offset] = points[i];
-				++offset;
+				extremum += points[i+k] * ((e >> k) % 2 ? 1 : -1);
+			}
+			if(extremum == extremums[e])
+			{
+				memcpy(goodPoints + goodPointCount * d, points + i, d * sizeof(int));
+				++goodPointCount;
 				break;
 			}
 		}
 	}
-	N = offset;
-}
 
-int calcMaxDistance()
-{
+//	std::cout << "good points " << goodPointCount << " / " << N << std::endl;
+
 	int maxDistance = 0;
-	Point * end = points + N;
-	for(Point * p1 = points; p1 != end; ++p1)
+	int * end = goodPoints + goodPointCount*d;
+	for(int * p1 = goodPoints; p1 != end; p1 += d)
 	{
-		for(Point * p2 = p1; p2 != end; ++p2)
+		for(int * p2 = p1; p2 != end; p2 += d)
 		{
-			int distance = calcDistance(p1->val, p2->val, d);
+			int distance = calcDistance(p1, p2, d);
 			if(distance > maxDistance)
 			{
 				maxDistance = distance;
 			}
 		}
 	}
-	return maxDistance;
-}
-
-int main()
-{
-	auto start = std::chrono::system_clock::now();
-
-	memset(points, 0, MAX_POINTS * sizeof(Point));
-//	std::cout << "Init done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-
-	readInput();
-//	std::cout << "Read done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-
-	readPoints();
-//	std::cout << "Read points done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-
-	calcGoodPoints();
-//	std::cout << "Good points(" << N << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-
-	std::cout << calcMaxDistance() << std::endl;
+	delete[] points;
+	delete[] goodPoints;
+	std::cout << maxDistance << std::endl;
 
 //	std::cout << "Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 
