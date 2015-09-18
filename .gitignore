@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# input data files, scripts, gprof result
+*.input*
+*.bat
+*.analysis
