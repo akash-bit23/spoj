@@ -90,7 +90,7 @@ int main()
 	size = out;
 
 //	std::cout << "Read points done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-
+/*
 	int goodSize = 0;
 	for(int i = 0; i < size; i += d)
 	{
@@ -110,7 +110,7 @@ int main()
 		}
 	}
 	size = goodSize;
-
+*/
 //	std::cout << "Good points done(" << size/d << "), elapsed " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 
 	int maxDistance = 0;
