@@ -66,7 +66,7 @@ int main()
 		{
 			points[out+k] = strtol(inputStr, &inputStr, 10);
 		}
-		bool notgood = true;
+		bool good = false;
 		int s = 0;
 		for(int e = 0; e < extremumCount; ++e)
 		{
@@ -79,10 +79,10 @@ int main()
 			if(i == 0 || extremum >= extremums[e])
 			{
 				extremums[e] = extremum;
-				notgood = false;
+				good = true;
 			}
 		}
-		if(!notgood)
+		if(good)
 		{
 			out += d;
 		}
