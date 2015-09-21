@@ -41,7 +41,7 @@ inline int readint(char **ptr)
 
 	while((c = *(in++)) > '-')
 	{
-		n = n * 10 + (c - '0');
+		n = (n << 1) + (n << 3) + (c - '0');
 	}
 
 	*ptr = in;
