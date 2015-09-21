@@ -44,8 +44,9 @@ int main()
 		}
 	}
 
-
-//	std::cout << "Init done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#ifdef DEBUG
+	std::cout << "Init done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#endif
 
 	std::string input;
 	static const int BUFFER_SIZE = 1024*1024;
@@ -55,7 +56,9 @@ int main()
 		std::cin.read(buf, BUFFER_SIZE);
 		input.append(buf, std::cin.gcount());
 	}
-//	std::cout << "Read done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#ifdef DEBUG
+	std::cout << "Read done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#endif
 
 	char * inputStr = (char*)input.data();
 	
@@ -89,29 +92,9 @@ int main()
 	}
 	size = out;
 
-//	std::cout << "Read points done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-/*
-	int goodSize = 0;
-	for(int i = 0; i < size; i += d)
-	{
-		for(int e = 0; e < (1<<d); ++e)
-		{
-			int extremum = 0;
-			for(int k = 0; k < d; ++k)
-			{
-				extremum += points[i+k] * ((e >> k) % 2 ? 1 : -1);
-			}
-			if(extremum == extremums[e])
-			{
-				memcpy(points + goodSize, points + i, d * sizeof(int));
-				goodSize += d;
-				break;
-			}
-		}
-	}
-	size = goodSize;
-*/
-//	std::cout << "Good points done(" << size/d << "), elapsed " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#ifdef DEBUG
+	std::cout << "Read points done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#endif
 
 	int maxDistance = 0;
 	int * end = points + size;
@@ -129,7 +112,9 @@ int main()
 	delete[] points;
 	std::cout << maxDistance << std::endl;
 
-//	std::cout << "Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#ifdef DEBUG
+	std::cout << "Elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#endif
 
 	return 0;
 }
