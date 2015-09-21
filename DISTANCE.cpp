@@ -20,13 +20,56 @@ inline int calcDistance(int * p1, int * p2, int d)
 	return distance;
 }
 
+
+inline int readint(char **ptr)
+{
+	int n;
+	char * in = *ptr;
+	char c;
+
+	while((c = *(in++)) < '-');
+
+	bool negative = c == '-';
+	if(!negative)
+	{
+		n = c - '0';
+	}
+	else
+	{
+		n = 0;
+	}
+
+	while((c = *(in++)) > '-')
+	{
+		n = n * 10 + (c - '0');
+	}
+
+	*ptr = in;
+	return negative ? -n : n;
+}
+
+
 int main()
 {
 	auto start = std::chrono::system_clock::now();
 
-	int N;
-	int d;
-	std::cin >> N >> d;
+	std::string input;
+	static const int BUFFER_SIZE = 1024*1024;
+	char buf[BUFFER_SIZE];
+	while(std::cin.good()) 
+	{
+		std::cin.read(buf, BUFFER_SIZE);
+		input.append(buf, std::cin.gcount());
+	}
+	#ifdef DEBUG
+	std::cout << "Read done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
+	#endif
+
+	char * inputStr = (char*)input.data();
+
+	int N = readint(&inputStr);
+	int d = readint(&inputStr);
+
 	int size = N*d;
 	int * points = new int[size];
 
@@ -47,28 +90,15 @@ int main()
 	#ifdef DEBUG
 	std::cout << "Init done, elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
 	#endif
-
-	std::string input;
-	static const int BUFFER_SIZE = 1024*1024;
-	char buf[BUFFER_SIZE];
-	while(std::cin.good()) 
-	{
-		std::cin.read(buf, BUFFER_SIZE);
-		input.append(buf, std::cin.gcount());
-	}
-	#ifdef DEBUG
-	std::cout << "Read done(" << size/d << "), elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start).count() << " ms" << std::endl;
-	#endif
-
-	char * inputStr = (char*)input.data();
 	
 	int out = 0;
 	for(int i = 0; i < size; i += d) 
 	{
 		for(int k = 0; k < d; ++k)
 		{
-			points[out+k] = strtol(inputStr, &inputStr, 10);
+			points[out+k] = readint(&inputStr);
 		}
+
 		bool good = false;
 		int s = 0;
 		for(int e = 0; e < extremumCount; ++e)
